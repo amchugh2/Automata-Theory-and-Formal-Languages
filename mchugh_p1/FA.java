@@ -55,6 +55,7 @@ public class FA {
 								if(accepted_strings.contains(string_state) != true) {
 									// add string
 									accepted_strings.add(string_state);
+									//System.out.println("String State: " + string_state);
 								}
 								// if not accept state and there are no accepted strings
 								if(is_accept[int_state] != true && accepted_strings.size() == 0){
@@ -67,7 +68,7 @@ public class FA {
 						}
 						//nonempty
 						else {
-                            ArrayList<String> updates = new ArrayList<String>(Arrays.asList(NFA_states.get(x), state_status));
+							ArrayList<String> updates = new ArrayList<String>(Arrays.asList(NFA_states.get(x), state_status));
 							NFA.add(updates);
 						}
 					}
@@ -89,19 +90,19 @@ public class FA {
 			NFA.remove(0);
 		}
 	}
-	
+
 	public void set_start_state(String i, String start) {
 		start_state = start;
 		NFA.add(new ArrayList<String>(Arrays.asList(start, i)));
 	}
-	
+
 	public void set_transition(String input_trans, String end) {
 		if(transitions.containsKey(input_trans) == false) {
 			transitions.put(input_trans, new ArrayList<String>());
 			transitions.get(input_trans).add(end);
 		}
 	}
-	
+
 	public void set_accept_state(String s) {
 		// convert to int
 		int int_state = Integer.parseInt(s);
@@ -111,17 +112,22 @@ public class FA {
 	}
 
 	public void pretty_print() {
-		if(accepted_strings.size() == 0) {
-			System.out.println("Accept ");
+		System.out.println("Accepted Strings: " + accepted_strings);
+		if(accepted_strings.size() > 0) {
+			System.out.print("Accept ");
+			/*
 			for(int i = 0; i < accepted_strings.size(); i++){
-				System.out.print(i + " ");
-			}
+				System.out.print(accepted_strings + " ");
+			 */
+			for(String str : accepted_strings) System.out.print(str + " ");
 		}
 		else {
-			System.out.println("Reject: ");
+			/*
 			for(int j = 0; j < rejected_strings.size(); j++) {
 				System.out.print(j + " ");
-			}
+			 */
+			System.out.print("Reject: ");
+			for(String rej : rejected_strings) System.out.print(rej + " ");
 		}
 	}
 }
