@@ -5,83 +5,94 @@ import java.io.FileReader;
 import java.io.IOException;
 
 public class mchugh_p1 {
-	public static void main(String[] args){
+	public static void main(String[] args) {
+		// Create NFA
 		FA nfa = new FA();
-		String test_file = "";
-		String i = "";
+		// Initialize file and input
+		String file = "";
+		String input = "";
+		// FIXME: Hard-coded paths
+		//String sample1_path = "C:\\Users\\abbym\\eclipse-workspace\\mchugh_p1\\src\\sample_1.txt";
+		//String sample2_path = "C:\\Users\\abbym\\eclipse-workspace\\mchugh_p1\\src\\sample_2.txt";
 
-		// error checking
-		// if invalid input
-		if(args.length != 2) {
-			System.out.println("Invalid Input");
-			return;
+		//Check for correct # args
+		if(args.length == 2) {
+			file = args[0];
+			input = args[1];
+		} else {
+			System.out.println("Invalid Input: include only input file and input string");
 		}
-		else {
-			i = args[1];
-			test_file = args[0];
-		}
 
-		try { // need to surrond buffered reader with try/catch
-			// Get input
-			BufferedReader input = new BufferedReader(new FileReader("C:\\Users\\abbym\\git\\repository\\mchugh_p1\\src\\mchugh_p1\\sample_1.txt"));
-			/* error checking
-            if(input.exists()) {
-            	System.out.println("Exists");
-            }
-			 */
-			String l;
+		try {
+			// OFFICE HOURS: How to read multiple input files at once and get path?
 
-			while((l = input.readLine()) != null){
-				// Break up lines by whitespace characters
-				String[] l_u = l.split("\\s+");
-				// Get info on specific line
-				String status = l_u[0];
-				String state = l_u[1];
+			BufferedReader input_file = new BufferedReader(new FileReader("C:\\Users\\abbym\\eclipse-workspace\\mchugh_p1\\src\\sample_1.txt"));
+			String input_line;
 
-				// Check type
-				if(status.equals("state")) {
-					if(l_u.length == 3) {
-						String next_type = l_u[2];
+			//Parse text file by line
+			while((input_line = input_file.readLine()) != null) {
+				String[] input_split = input_line.split("\\s+");
+				String state = input_split[1];
+				String type = input_split[0];
+
+				// if state
+				if(type.equals("state")) {
+					// 3 types
+					if(input_split.length == 3) {
+						// next state
+						String next_type = input_split[2];
+						// if next type is either accept or start state
 						if(next_type.equals("acceptstart")) {
-							nfa.set_start_state(state, i);
+							// set accept
 							nfa.set_accept_state(state);
+							// set start state
+							nfa.set_start_state(state, input);
 						}
+						// if start
+						if(next_type.equals("start")) {
+							nfa.set_start_state(state, input);
+						}
+						// if accept
 						else if(next_type.equals("accept")) {
 							nfa.set_accept_state(state);
 						}
-						else if(next_type.equals("start")) {
-							nfa.set_start_state(state, i);
-						}
-						else { // impossible, invalid entry
-							System.out.println("Invalid entry for state: " + next_type);
-							return;
-						}
-					}
-					else {
-						if(l_u[3].equals("accept") && l_u[2].equals("start")) {
-							nfa.set_start_state(state, i);
-							nfa.set_accept_state(state);
-						}
 						else {
-							System.out.println("Invalid entry type");
+							// then, not valid entry
+							System.out.println("Invalid state entry");
+							return;
+						}
+
+					} else {
+						// End
+						if(input_split[2].equals("start") && input_split[3].equals("accept")) {
+							nfa.set_accept_state(state);
+							nfa.set_start_state(state, input);
+						} else {
+							// Invalid
+							System.out.println("Invalid state type");
 							return;
 						}
 					}
-				}
-					else if(status.equals("transition")) {
-						String initial = l_u[0] + l_u[1];
-						nfa.set_transition(initial, l_u[2]);
-					}
-					else {
-						System.out.println("Invalid Input");
-					}
-					nfa.NFA_generator();
-					nfa.pretty_print();
-					input.close();
+					// If type equals tranisition
+				} else if(type.equals("transition")) {
+					String transition = input_split[1] + input_split[2];
+					nfa.set_valid_transition(transition, input_split[3]);
+				} else {
+					System.out.println("Invalid input type");
+					return;
 				}
 			}
-		catch(IOException e) {
+
+			//Create NFA & Format Print
+			nfa.NFA_generator();
+			nfa.pretty_print();
+			// Close BR
+			input_file.close();
+
+			// Error catching
+		} catch(IOException e) {
 			System.out.println("File not found");
 		}
+		//finally 
 	}
 }
