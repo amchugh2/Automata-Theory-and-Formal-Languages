@@ -7,10 +7,11 @@ import java.io.IOException;
 public class mchugh_p1 {
 	public static void main(String[] args){
 		FA nfa = new FA();
-		String test_file;
-		String i;
+		String test_file = "";
+		String i = "";
 
 		// error checking
+		// if invalid input
 		if(args.length != 2) {
 			System.out.println("Invalid Input");
 			return;
@@ -22,7 +23,12 @@ public class mchugh_p1 {
 
 		try { // need to surrond buffered reader with try/catch
 			// Get input
-			BufferedReader input = new BufferedReader(new FileReader(test_file));
+			BufferedReader input = new BufferedReader(new FileReader("C:\\Users\\abbym\\git\\repository\\mchugh_p1\\src\\mchugh_p1\\sample_1.txt"));
+			/* error checking
+            if(input.exists()) {
+            	System.out.println("Exists");
+            }
+			 */
 			String l;
 
 			while((l = input.readLine()) != null){
@@ -61,14 +67,21 @@ public class mchugh_p1 {
 							return;
 						}
 					}
+				}
+					else if(status.equals("transition")) {
+						String initial = l_u[0] + l_u[1];
+						nfa.set_transition(initial, l_u[2]);
+					}
+					else {
+						System.out.println("Invalid Input");
+					}
 					nfa.NFA_generator();
 					nfa.pretty_print();
 					input.close();
 				}
 			}
-		}
 		catch(IOException e) {
-			System.out.println("Error, File Not Found");
+			System.out.println("File not found");
 		}
 	}
 }
