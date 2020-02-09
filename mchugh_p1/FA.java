@@ -1,133 +1,129 @@
 package mchugh_p1;
+import java.util.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-
-// class to hold information /methods about FA
 public class FA {
-	// NFA object
-	public ArrayList<ArrayList<String>> NFA = new ArrayList<ArrayList<String>>();
-	public ArrayList<Integer> accept_states = new ArrayList<Integer>();
-	public boolean accept = true;
-	// max states = 1001. create array of bools
-	public boolean[] is_accept = new boolean[1001];
-	// rejected strings
-	public HashSet<String> rejected_strings = new HashSet<String>();
-	// accepted strings
-	public HashSet<String> accepted_strings = new HashSet<String>();
-	public Map<String, ArrayList<String>> transitions = new HashMap<String, ArrayList<String>>();
-	public String start_state = "";
+	// Create list for FA
+    private ArrayList<ArrayList<String>> FA = new ArrayList<ArrayList<String>>();
+    
+    // HashSets to hold accepted_strings and rejected_strings strings
+    private HashSet<String> accepted_strings = new HashSet<String>();
+    private HashSet<String> rejected_strings = new HashSet<String>();
+    
+    // List of Accept states
+    private ArrayList<Integer> accept_state = new ArrayList<Integer>();
+    
+    // Bool - default mode = accept
+    private boolean reject = false;
+    
+    // Array of potential accept states - 1000 valid_transitions
+    private boolean[] accept_states = new boolean[1000];
+    
+    // Map of valid valid_transitions
+    private Map<String, ArrayList<String>> valid_transitions = new HashMap<String, ArrayList<String>>();
+    private String start;
 
-	// NFA generator
-	public void NFA_generator() {
-		// if nothing, do not accept
-		if(NFA.size() == 0) {
-			accept = false;
-		}
-		// if nonempty
-		if(NFA.size() != 0) {
-			// get start and first state
-			String first_state = NFA.get(0).get(1);
-			// if NFA is not empty
-			if(start_state.isEmpty() != true) {
-				String state_status = first_state.substring(1);
-				// get next state
-				String curr_state = NFA.get(0).get(0) + NFA.get(0).get(1).charAt(0);
-				// if transition set contains
-				if(transitions.containsKey(curr_state)) {
-					// create list of valid transitions
-					ArrayList<String> NFA_states = new ArrayList<>(transitions.get(curr_state));
+    public void set_start_state(String input, String n) {
+        start = input;
+        FA.add(new ArrayList<String>(Arrays.asList(start,n)));
+    }
 
-					for(int x = 0; x < NFA_states.size(); x++) {
-						// String state
-						String string_state = NFA_states.get(x);
-						// Convert to int
-						int int_state = Integer.parseInt(string_state);
+    public void set_accept_state(String state) {
+    	// Change to int
+        int int_state = Integer.parseInt(state);
+        // Set bool list
+        accept_states[int_state] = true;
+        // Add to list of accept states
+        accept_state.add(int_state);
+    }
 
-						//if at end of string input
-						if(state_status.isEmpty() == true) {
-							// if string is at accept state
-							if(is_accept[int_state]) {
-								// if string is not already in list
-								if(accepted_strings.contains(string_state) != true) {
-									// add string
-									accepted_strings.add(string_state);
-									//System.out.println("String State: " + string_state);
-								}
-								// if not accept state and there are no accepted strings
-								if(is_accept[int_state] != true && accepted_strings.size() == 0){
-									// if rejected string is not already there, add it
-									if(rejected_strings.contains(string_state)){
-										rejected_strings.add(string_state);
-									}
-								}
-							}
-						}
-						//nonempty
-						else {
-							ArrayList<String> updates = new ArrayList<String>(Arrays.asList(NFA_states.get(x), state_status));
-							NFA.add(updates);
-						}
-					}
-				}
-				// else reject
-				else accept = false;
-			}
-			else {
-				String string_c_state = NFA.get(0).get(0);
-				int int_c_state = Integer.parseInt(string_c_state);
-				if(is_accept[int_c_state] == true) {
-					accepted_strings.add(string_c_state);
-				}
-				else {
-					// not an acceptable string
-					rejected_strings.add(string_c_state);
-				}
-			}
-			NFA.remove(0);
-		}
-	}
+    public void set_valid_transition(String input, String end) {
+        if(valid_transitions.containsKey(input) == false) {
+        	valid_transitions.put(input, new ArrayList<String>());
+        }
+        valid_transitions.get(input).add(end);
+    }
+    
+    // NFA generator
+    public void NFA_generator() {
+    	// While FA is not empty
+        while(FA.size() != 0) {
+        	// Get input state num
+            String input_state = FA.get(0).get(1);
 
-	public void set_start_state(String i, String start) {
-		start_state = start;
-		NFA.add(new ArrayList<String>(Arrays.asList(start, i)));
-	}
+            // If input state is not empty
+            if(input_state.isEmpty() == false) {
+            	// Create key
+                // Get next transition
+                String next = FA.get(0).get(0) + FA.get(0).get(1).charAt(0);
+                String status = input_state.substring(1);
+                //System.out.println(e);
 
-	public void set_transition(String input_trans, String end) {
-		if(transitions.containsKey(input_trans) == false) {
-			transitions.put(input_trans, new ArrayList<String>());
-			transitions.get(input_trans).add(end);
-		}
-	}
+                //If valid transition
+                if(valid_transitions.containsKey(next)) {
+                	// Get list of states beginning with next
+                    ArrayList<String> states = new ArrayList<>(valid_transitions.get(next));
+                    
+                    // Iterate thru list of new states
+                    for(int i = 0; i < states.size(); i++) {
+                    	// New state
+                        String new_state = states.get(i);
+                        // Integer to check for pool
+                        int int_NS = Integer.parseInt(new_state);
+                        
+                        // if status is empty
+                        if(status.isEmpty() == true) {
+                        	// if in accept state
+                            if(accept_states[int_NS]) {
+                            	// if is not already included in accepted strings
+                                if(accepted_strings.contains(new_state) == false) {
+                                	// Add
+                                	accepted_strings.add(new_state);
+                                }
+                            }
+                            
+                            // if NOT in accept states and empty
+                            if(accept_states[int_NS] == false && accepted_strings.size() == 0) {
+                            	// if NOT in rejected strings already, add it
+                                if(rejected_strings.contains(new_state) == false) {
+                                	rejected_strings.add(new_state);
+                                }
+                            }
+                        } else {
+                        	// update and add to FA
+                            ArrayList<String> updated = new ArrayList<String>(Arrays.asList(states.get(i), status));
+                            FA.add(updated);
+                        }
+                    }
+                    // ELSE: REJECT THE STRING
+                } else reject = true;
+            } else { // INPUT STATE IS EMPTY
+            	
+                String first_state = FA.get(0).get(0);
+                System.out.println(first_state);
+                int int_NS = Integer.parseInt(first_state);
 
-	public void set_accept_state(String s) {
-		// convert to int
-		int int_state = Integer.parseInt(s);
-		is_accept[int_state] = true;
-		// add to list
-		accept_states.add(int_state);
-	}
+                if(accept_states[int_NS] == false) {
+                	rejected_strings.add(first_state);
+                }
+                else{
+                	accepted_strings.add(first_state);
+                }
+            }
+            // REMOVE
+            FA.remove(0);
+        }
+    }
 
-	public void pretty_print() {
-		System.out.println("Accepted Strings: " + accepted_strings);
-		if(accepted_strings.size() > 0) {
-			System.out.print("Accept ");
-			/*
-			for(int i = 0; i < accepted_strings.size(); i++){
-				System.out.print(accepted_strings + " ");
-			 */
-			for(String str : accepted_strings) System.out.print(str + " ");
-		}
-		else {
-			/*
-			for(int j = 0; j < rejected_strings.size(); j++) {
-				System.out.print(j + " ");
-			 */
-			System.out.print("Reject: ");
-			for(String rej : rejected_strings) System.out.print(rej + " ");
-		}
-	}
+    // Formatting
+    public void pretty_print() {
+        if(accepted_strings.size() > 0) {
+            System.out.print("Accept ");
+            for(String s : accepted_strings) System.out.print(s + " ");
+        } else {
+            System.out.print("Reject ");
+            for(String s : rejected_strings) System.out.print(s + " ");
+        }
+
+        System.out.println();
+    }
 }
