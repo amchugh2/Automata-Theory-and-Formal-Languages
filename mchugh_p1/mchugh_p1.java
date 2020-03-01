@@ -188,14 +188,16 @@ public class mchugh_p1 {
 				// if state
 				else if(type.equalsIgnoreCase("state")) {
 					// 3 types
-					if(input_split.length != 3) {
-						// Invalid Input
-						if((input_split[2] != "start") && (input_split[3] != "accept")) {
+					// FIXME: THIS IS WHERE THE ERROR IS
+					if(input_split.length != 3) { // Added additional if statement before declaring error
+						if(input_split[2].equalsIgnoreCase("start") && input_split[3].equalsIgnoreCase("accept")) {
+							// Not error
+							nfa.set_start_state(state, input);
+							nfa.set_accept_state(state);
+						}
+						else { //error
 							System.out.println("Invalid state type");
 							return;
-						} else {	
-							nfa.set_accept_state(state);
-							nfa.set_start_state(state, input);
 						}
 					}
 					else {
@@ -209,7 +211,7 @@ public class mchugh_p1 {
 							nfa.set_start_state(state, input);
 						}
 						// if start
-						if(next_type.equalsIgnoreCase("start")) {
+						else if(next_type.equalsIgnoreCase("start")) {
 							nfa.set_start_state(state, input);
 						}
 						// if accept
@@ -217,7 +219,6 @@ public class mchugh_p1 {
 							nfa.set_accept_state(state);
 						}
 					} 
-					// Invalid transition
 				} 
 			}
 
